@@ -13,57 +13,16 @@ import re
 import scipy.signal as sig
 import scipy.optimize as opt
 # from tkinter import Tk, filedialog
+from auxiliary_functions_for_deconvolution import exp_decay, conv, s_squared, \
+                                                    calc_r2, replace_comma_dot
 
 plt.ioff()
 plt.close("all")
 
-# model decay as mono-exponential
-def exp_decay(params, time):
-    tau, amplitude, offset = params
-    y = amplitude*np.exp(-time/tau) + offset
-    return y
+# extension of files to replace comma by dot
+extension = '\.dat'
 
-# convolution of the exponential decay with the IRF
-def conv(decay_model, irf, mode):
-    c = np.convolve(decay_model, irf, mode=mode)
-    return c
-
-# Function to minimize: S-squared. We will find the best parameters (tau, 
-# amplitude, offset) that minimize the difference between the acquired decay 
-# histogram of arrival times and the convoluted one
-def s_squared(params, time, decay_data, irf, number_of_points):
-    func = exp_decay(params, time)
-    convolved_model = conv(func, irf, 'full')
-    index_max_conv = np.argmax(convolved_model)
-    convolved_decay = convolved_model[index_max_conv:index_max_conv + number_of_points]
-    if False:
-        # DO NOT set ti True unless debugging
-        plt.figure()
-        plt.plot(func, 'o', color='C0', label='Model')
-        plt.plot(decay_data, 's', color='C1', label='Raw')
-        plt.plot(convolved_decay, '-', color='C3', label='Conv decay')
-        plt.plot(convolved_model, '^', color='C4', label='Conv full')
-        plt.legend()
-        plt.xlabel('Array index')
-        plt.ylabel('Counts')
-        plt.show()
-    s2 = 0
-    residuals = decay_data - convolved_decay
-    s2_residuals = residuals**2
-    s2 = np.sum(s2_residuals)
-    return s2
-
-def calc_r2(observed, fitted):
-    # Calculate coefficient of determination
-    avg_y = observed.mean()
-    # sum of squares of residuals
-    ssres = ((observed - fitted)**2).sum()
-    # total sum of squares
-    sstot = ((observed - avg_y)**2).sum()
-    return 1.0 - ssres/sstot
-
-# process data
-# smoothing
+# parameter definition for smoothing
 window = 13
 deg = 1
 repetitions = 1
@@ -72,6 +31,10 @@ repetitions = 1
 # make a list of files
 folder = 'C:\\datos_mariano\\posdoc\\MoS2\\lifetime_measurement\\20210707_flakes'
 folder = 'C:\\datos_mariano\\posdoc\\MoS2\\lifetime_measurement\\20210709_glass'
+
+# repplace comma by dot in the specified folder
+replace_comma_dot(folder, extension)
+# make a list of the files to be analized
 list_of_files = os.listdir(folder)
 list_of_files = [f for f in list_of_files if re.search('\.dat',f)]
 list_of_files.sort()
