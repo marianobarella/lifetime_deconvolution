@@ -1,9 +1,56 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 12 14:21:17 2021
-
+Monday Jul 12 2021
+Fribourg, Switzerland
 @author: Mariano Barella
 
+Deconvolution of lifetime histogram decay with IRF
+
+This code process lifetime histograms obtained with the LabView software 
+in order to remove the instrument response function (IRF) from the acquired data.
+The IRF distorts the true lifetime of the detected molecule due to timing 
+accuracy, timing error (phase noise) and not-so-sharp excitation source.
+
+The code uses another code where auxiliary functions are placed.
+Another code for processing the IRF is given. 
+It's called "IRF_lifetime_decay.py" (*).
+
+Inputs: 
+    - The IRF of the laser you used must be measured.
+    - Place the IRF file in a subfolder, inside the data's folder.
+    - Name and filepath of the IRF.
+    - Folder of the data. 
+    - Window, degee and number of repetitions for the smoothing of the 
+    histogram. Only for presentation puposes.
+    - Extension of the lifetime hisogram files.
+
+Analysis pipeline:
+    1) The program looks for data with the selected extension.
+    2) It replaces all commas present in the files with dots.
+    2) Then, loads the IRF.
+    3) Then, opens each file and process it (typical these files contain 
+    several histograms appended as were extracted using the LabView software).
+    4) Data processing:
+        a) crop the tail of the histogram (usually has higher counts than expected)
+        b) smoothing
+        c) find maximum
+        d) crop data from maximum to last point
+        e) deconvolve (**)
+        f) grab deconvolved lifetime
+        g) plot raw data, smoothed data and deconvolved data
+        h) save data
+
+** Deconvolution is performed as follows:
+    - A single decay model is assumed (exponential decay)
+    - With the obtained IRF (code is also provided)
+    - Convolute model with IRF
+    - Fit the convoluted decay (model+IRF) with the acquired data
+    - This fitting step makes the deconvolution process an iterative process.
+    - Initial parameteres are given and minimization of the residuals
+    (convolved model minus data) gives the best lifetime that fits the data.
+    - As this code performs a fitting of the acquired data a figure of merit 
+    for this process, a goodess of the fit, R-squared is given.
+    
 """
 
 import numpy as np
@@ -19,24 +66,24 @@ from auxiliary_functions_for_deconvolution import exp_decay, conv, s_squared, \
 plt.ioff()
 plt.close("all")
 
-# extension of files to replace comma by dot
+# INPUT extension of files to replace comma by dot
 extension = '\.dat'
 
-# parameter definition for smoothing
+# INPUT parameter definition for smoothing
 window = 13
 deg = 1
 repetitions = 1
 
 ##############################################################################
-# make a list of files
+# INPUT data's folder
 folder = 'C:\\datos_mariano\\posdoc\\MoS2\\lifetime_measurement\\20210707_flakes'
 folder = 'C:\\datos_mariano\\posdoc\\MoS2\\lifetime_measurement\\20210709_glass'
 
-# repplace comma by dot in the specified folder
+# replace comma by dot in the specified folder
 replace_comma_dot(folder, extension)
 # make a list of the files to be analized
 list_of_files = os.listdir(folder)
-list_of_files = [f for f in list_of_files if re.search('\.dat',f)]
+list_of_files = [f for f in list_of_files if re.search(extension, f)]
 list_of_files.sort()
 L = len(list_of_files)
 
@@ -97,7 +144,7 @@ for i in range(L):
                                               window, deg, axis = 0, 
                                               mode='interp')
         
-        # print('\n------- Finding lifetime of histogram number %03d\n' % j)
+        print('\n------- Finding lifetime of histogram number %03d\n' % j)
         # minimize difference between convolved signal and data
         # guess initial parameters
         init_params = [2, 10, 0] # tau, amplitude, offset
@@ -132,10 +179,10 @@ for i in range(L):
         fitted_conv_decay = fitted_conv[index_max_fitted_conv:index_max_fitted_conv + N_decay]
         # figure of merit of the fit
         R2 = calc_r2(counts_decay, fitted_conv_decay)
-        # print('R-squared %.2f' % R2)
-        # print('Lifetime %.2f ns' % best_params[0])
-        # print('Amplitude %.2f' % best_params[1])
-        # print('Offset %.2f' % best_params[2])
+        print('R-squared %.2f' % R2)
+        print('Lifetime %.2f ns' % best_params[0])
+        print('Amplitude %.2f' % best_params[1])
+        print('Offset %.2f' % best_params[2])
         # send parameters out of loop to save later
         lifetime_array[j] = best_params[0]
         R2_array[j] = R2

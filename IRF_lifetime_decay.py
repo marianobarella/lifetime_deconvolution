@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 12 14:21:17 2021
-
+Monday Jul 12 2021
+Fribourg, Switzerland
 @author: Mariano Barella
+
+Process histogram decay of IRF
+
+1) Load data
+2) Smooth data
+3) Normalize
+4) Plot
+5) Save
 
 """
 
@@ -58,7 +66,7 @@ for i in range(repetitions - 1):
                                             window, deg, axis = 0, 
                                             mode=mode)
 
-counts_green_smooth[14] = 30
+# counts_green_smooth[14] = 30
 
 # red laser at red channel
 counts_red_smooth = sig.savgol_filter(counts_red, 
@@ -69,8 +77,8 @@ for i in range(repetitions - 1):
     counts_red_smooth = sig.savgol_filter(counts_red_smooth, 
                                             window, deg, axis = 0, 
                                             mode=mode)
-counts_red_smooth[13] = 700
-counts_red_smooth[14] = 900
+# counts_red_smooth[13] = 700
+# counts_red_smooth[14] = 900
 
 # normalization
 counts_green_smooth_norm = counts_green_smooth/max(counts_green_smooth)

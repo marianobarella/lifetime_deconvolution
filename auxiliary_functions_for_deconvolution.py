@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 12 14:21:17 2021
-
+Monday Jul 12 2021
+Fribourg, Switzerland
 @author: Mariano Barella
+
+Auxiliary functions for "deconvolution_of_lifetime_decay.py"
 
 """
 
