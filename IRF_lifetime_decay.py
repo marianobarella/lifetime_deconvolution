@@ -66,8 +66,6 @@ for i in range(repetitions - 1):
                                             window, deg, axis = 0, 
                                             mode=mode)
 
-# counts_green_smooth[14] = 30
-
 # red laser at red channel
 counts_red_smooth = sig.savgol_filter(counts_red, 
                                         window, deg, axis = 0, 
@@ -77,8 +75,6 @@ for i in range(repetitions - 1):
     counts_red_smooth = sig.savgol_filter(counts_red_smooth, 
                                             window, deg, axis = 0, 
                                             mode=mode)
-# counts_red_smooth[13] = 700
-# counts_red_smooth[14] = 900
 
 # normalization
 counts_green_smooth_norm = counts_green_smooth/max(counts_green_smooth)

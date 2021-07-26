@@ -13,7 +13,7 @@ accuracy, timing error (phase noise) and not-so-sharp excitation source.
 
 The code uses another code where auxiliary functions are placed.
 Another code for processing the IRF is given. 
-It's called "IRF_lifetime_decay.py" (*).
+It's called "IRF_lifetime_decay.py".
 
 Inputs: 
     - The IRF of the laser you used must be measured.
@@ -35,7 +35,7 @@ Analysis pipeline:
         b) smoothing
         c) find maximum
         d) crop data from maximum to last point
-        e) deconvolve (**)
+        e) deconvolve (** see below)
         f) grab deconvolved lifetime
         g) plot raw data, smoothed data and deconvolved data
         h) save data
